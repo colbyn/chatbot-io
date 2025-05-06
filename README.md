@@ -44,15 +44,14 @@ This is the JSON schema of the liquid template environment:
 $ cargo run -- format --input test/source-1/*.py --template test/source-1/template.liquid
 ```
 
-> Or if you have installed `chatbot-io`:
-> ```shell
-> $ chatbot-io format --input test/source-1/*.py --template test/source-1/template.liquid
+Or if you have installed `chatbot-io`:
+```shell
+$ chatbot-io format --input test/source-1/*.py --template test/source-1/template.liquid
+```
+> Note that you may install `chatbot-io` via cargo like so:
 > ```
->
-> > Note that you may install `chatbot-io` via cargo like so:
-> > ```
-> > cargo install --path .
-> > ```
+> cargo install --path .
+> ```
 
 **Will print to STDOUT:**
 ````
