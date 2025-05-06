@@ -1,10 +1,6 @@
 # CHATBOT-IO CLI
 
-Currently this tool is just a convenience reading files and compiling a 
-
-and building a resulting liquid template 
-
-Currently this tool is just a convenience for essentially string interpolation (via liquid template files) for formatting file contents in such a way that you can quickly paste the contents into a chatbot UI.
+Currently this tool is just a convenience reading files and template pre-processing. Essentially string interpolation (via liquid template files) for formatting file contents in such a way that you can quickly paste the contents into a chatbot UI.
 
 It accepts a list of files, a liquid template file path, and will compile the liquid template into a string that will be printed to `STDOUT`.
 
