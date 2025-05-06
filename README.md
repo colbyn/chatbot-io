@@ -48,6 +48,11 @@ $ cargo run -- format --input test/source-1/*.py --template test/source-1/templa
 > ```shell
 > $ chatbot-io format --input test/source-1/*.py --template test/source-1/template.liquid
 > ```
+>
+> > Note that you may install `chatbot-io` via cargo like so:
+> > ```
+> > cargo install --path .
+> > ```
 
 **Will print to STDOUT:**
 ````
