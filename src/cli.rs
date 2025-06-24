@@ -21,7 +21,7 @@ pub struct CliFormatCommand {
     /// Array of file paths or unix style glob patterns.
     /// 
     /// The system will try to automatically resolve whether each respective input is a glob or a file path. To disable glob mode checking and treat each input as a file path see the `no_globs` flag.
-    #[arg(long, num_args = 1..)]
+    #[arg(short, long, num_args = 1..)]
     input: Vec<String>,
     /// Disable glob mode behavior; all inputs will be considered file paths. OFF by default.
     #[arg(long, default_value_t = false)]
