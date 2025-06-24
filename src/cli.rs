@@ -15,8 +15,9 @@ pub enum CliCommand {
 
 #[derive(Parser, Debug)]
 pub struct CliFormatCommand {
+    /// The liquid template file; none uses the default template.
     #[arg(long)]
-    template: PathBuf,
+    template: Option<PathBuf>,
     /// Array of file paths or unix style glob patterns.
     /// 
     /// The system will try to automatically resolve whether each respective input is a glob or a file path. To disable glob mode checking and treat each input as a file path see the `no_globs` flag.
@@ -40,6 +41,7 @@ impl Cli {
 
 impl CliFormatCommand {
     pub fn execute(self) {
+        let default_template_source = include_str!("../default.liquid");
         let settings = crate::template::EnvironmentPopulateSettings::default()
             .set_allow_globs(!self.no_globs)
             .set_trim_contents(!self.no_trim);
@@ -47,9 +49,17 @@ impl CliFormatCommand {
             &self.input,
             settings
         );
-        let output_result = environment_result.and_then(|x| {
-            x.run_preprocessor(&self.template)
-        });
+        let output_result = {
+            if let Some(template_path) = self.template.as_ref() {
+                environment_result.and_then(|x| {
+                    x.run_preprocessor(&template_path)
+                })
+            } else {
+                environment_result.and_then(|x| {
+                    x.run_preprocessor_with_template_str(default_template_source)
+                })
+            }
+        };
         match output_result {
             Ok(output) => {
                 println!("{output}")

@@ -17,6 +17,20 @@ pub fn preprocess(
     Ok(output)
 }
 
+pub fn preprocess_with_template_str(
+    template_str: &str,
+    environment: &Environment,
+) -> Result<String, Box<dyn std::error::Error>> {
+    let globals = environment.to_object();
+    let output = liquid::ParserBuilder::with_stdlib()
+        .build()
+        .unwrap()
+        .parse(&template_str)
+        .unwrap()
+        .render(&globals)?;
+    Ok(output)
+}
+
 #[derive(Serialize, Deserialize)]
 pub struct Environment {
     pub files: Vec<File>,
@@ -74,7 +88,7 @@ impl Environment {
         settings: EnvironmentPopulateSettings,
     ) -> Result<Self, Box<dyn std::error::Error>> {
         let mut files = Vec::<File>::new();
-        for path in resolve_file_path_paterns(patterns)? {
+        for path in resolve_file_path_patterns(patterns)? {
             match File::from_file(path, settings) {
                 Ok(file) => {
                     files.push(file);
@@ -107,8 +121,17 @@ impl Environment {
         let environment = Self { files };
         Ok(environment)
     }
-    pub fn run_preprocessor(&self, template_path: impl AsRef<std::path::Path>) -> Result<String, Box<dyn std::error::Error>> {
+    pub fn run_preprocessor(
+        &self,
+        template_path: impl AsRef<std::path::Path>
+    ) -> Result<String, Box<dyn std::error::Error>> {
         preprocess(template_path, self)
+    }
+    pub fn run_preprocessor_with_template_str(
+        &self,
+        template_str: impl AsRef<str>
+    ) -> Result<String, Box<dyn std::error::Error>> {
+        preprocess_with_template_str(template_str.as_ref(), self)
     }
 }
 
@@ -164,7 +187,7 @@ impl File {
     }
 }
 
-fn resolve_file_path_paterns(patterns: &[String]) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
+fn resolve_file_path_patterns(patterns: &[String]) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
     fn resolve_entry_as_glob(pattern: &str) -> Result<Vec<PathBuf>, Box<dyn std::error::Error>> {
         let mut results = Vec::<PathBuf>::new();
         for pattern in glob::glob(pattern)? {
