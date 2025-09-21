@@ -29,6 +29,9 @@ pub struct CliFormatCommand {
     /// By default the system will attempt to trim the content string of leading and trailing whitespace. This flag will disable that behavior.
     #[arg(long, default_value_t = false)]
     no_trim: bool,
+    /// Compress
+    #[arg(long, default_value_t = false)]
+    compress: bool,
 }
 
 impl Cli {
