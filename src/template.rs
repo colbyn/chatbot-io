@@ -144,7 +144,7 @@ impl File {
         fn compute_fence(content: &str) -> String {
             let mut fence = String::from("```");
             loop {
-                if content.contains(&fence) {
+                if !content.contains(&fence) {
                     return fence
                 }
                 fence = format!("{fence}`");
