@@ -40,7 +40,8 @@ pub struct Environment {
 pub struct File {
     pub name: String,
     pub path: PathBuf,
-    pub contents: String,
+    pub content: String,
+    pub fence: String,
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -140,16 +141,26 @@ impl File {
         file_path: impl AsRef<std::path::Path>,
         settings: EnvironmentPopulateSettings,
     ) -> Result<Self, Box<dyn std::error::Error>> {
+        fn compute_fence(content: &str) -> String {
+            let mut fence = String::from("```");
+            loop {
+                if content.contains(&fence) {
+                    return fence
+                }
+                fence = format!("{fence}`");
+            }
+        }
         let file_path = file_path.as_ref();
         let file_name = file_path.file_name().unwrap().to_str().unwrap().to_string();
-        let mut file_contents = std::fs::read_to_string(file_path)?;
+        let mut file_content = std::fs::read_to_string(file_path)?;
         if settings.trim_contents {
-            file_contents = file_contents.trim().to_owned();
+            file_content = file_content.trim().to_owned();
         }
         Ok(File {
             name: file_name,
             path: file_path.to_path_buf(),
-            contents: file_contents
+            fence: compute_fence(&file_content),
+            content: file_content,
         })
     }
 }
@@ -172,17 +183,25 @@ impl Environment {
 impl File {
     fn to_object(&self) -> liquid::Object {
         let name: liquid::model::Value = liquid::model::Value::scalar(self.name.clone());
-        let contents: liquid::model::Value = liquid::model::Value::scalar(self.contents.clone());
+        let content: liquid::model::Value = liquid::model::Value::scalar(self.content.clone());
+        let fence: liquid::model::Value = liquid::model::Value::scalar(self.fence.clone());
         let mut object = liquid::Object::default();
         let path = self.path
             .to_str()
             .map(|x| x.to_string())
             .unwrap_or(self.name.clone());
         let path = liquid::model::Value::scalar(path);
+
+        // File metadata
         object.insert("name".into(), name);
         object.insert("path".into(), path);
 
-        object.insert("contents".into(), contents);
+        // File content
+        object.insert("content".into(), content);
+        
+        // Markdown fenced code block helper
+        object.insert("fence".into(), fence);
+
         object
     }
 }
