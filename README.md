@@ -76,3 +76,14 @@ print("This is script 1")
 print("This is script 2")
 ```
 ````
+
+# Updates
+
+## 2026-05-30 — Added STDIN Formatting Support
+
+```
+chatbot-io format -i src/cli.rs src/template.rs
+chatbot-io format -i -
+chatbot-io format -i src/cli.rs -
+cargo build -p web-browser-util 2>&1 | chatbot-io format -i -
+```
