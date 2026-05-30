@@ -77,13 +77,40 @@ impl Environment {
         input: &[String],
         settings: EnvironmentPopulateSettings,
     ) -> Result<Self, Box<dyn std::error::Error>> {
-        if settings.allow_globs {
-            return Self::populate_from_dynamic(input, settings)
-        } else {
-            let paths = input.iter().map(PathBuf::from).collect::<Vec<_>>();
-            return Self::populate_from_files(&paths, settings)
+        let mut stdin_count = 0usize;
+        let mut path_inputs = Vec::<String>::new();
+
+        for item in input {
+            if item == "-" {
+                stdin_count += 1;
+            } else {
+                path_inputs.push(item.clone());
+            }
         }
+
+        let mut environment = if settings.allow_globs {
+            Self::populate_from_dynamic(&path_inputs, settings)?
+        } else {
+            let paths = path_inputs.iter().map(PathBuf::from).collect::<Vec<_>>();
+            Self::populate_from_files(&paths, settings)?
+        };
+
+        if stdin_count > 0 {
+            if stdin_count > 1 {
+                return Err("stdin input `-` may only be used once".into());
+            }
+
+            let mut stdin_content = String::new();
+
+            use std::io::Read;
+            std::io::stdin().read_to_string(&mut stdin_content)?;
+
+            environment.files.push(File::from_stdin(stdin_content, settings));
+        }
+
+        Ok(environment)
     }
+    
     pub fn populate_from_dynamic(
         patterns: &[String],
         settings: EnvironmentPopulateSettings,
@@ -141,21 +168,15 @@ impl File {
         file_path: impl AsRef<std::path::Path>,
         settings: EnvironmentPopulateSettings,
     ) -> Result<Self, Box<dyn std::error::Error>> {
-        fn compute_fence(content: &str) -> String {
-            let mut fence = String::from("```");
-            loop {
-                if !content.contains(&fence) {
-                    return fence
-                }
-                fence = format!("{fence}`");
-            }
-        }
         let file_path = file_path.as_ref();
         let file_name = file_path.file_name().unwrap().to_str().unwrap().to_string();
+
         let mut file_content = std::fs::read_to_string(file_path)?;
+
         if settings.trim_contents {
             file_content = file_content.trim().to_owned();
         }
+
         Ok(File {
             name: file_name,
             path: file_path.to_path_buf(),
@@ -239,4 +260,36 @@ fn resolve_file_path_patterns(patterns: &[String]) -> Result<Vec<PathBuf>, Box<d
         }
     }
     Ok(results)
+}
+
+impl File {
+    pub fn from_stdin(
+        content: impl Into<String>,
+        settings: EnvironmentPopulateSettings,
+    ) -> Self {
+        let mut content = content.into();
+
+        if settings.trim_contents {
+            content = content.trim().to_owned();
+        }
+
+        File {
+            name: "<stdin>".to_string(),
+            path: PathBuf::from("<stdin>"),
+            fence: compute_fence(&content),
+            content,
+        }
+    }
+}
+
+fn compute_fence(content: &str) -> String {
+    let mut fence = String::from("```");
+
+    loop {
+        if !content.contains(&fence) {
+            return fence;
+        }
+
+        fence = format!("{fence}`");
+    }
 }
