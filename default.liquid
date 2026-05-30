@@ -1,6 +1,15 @@
-{% for file in files %}
+{% for file in files -%}
+{% if file.path == "<stdin>" -%}
+{{ file.fence }}
+{{ file.content }}
+{{ file.fence }}
+{% else -%}
 **`{{ file.path }}`**:
 {{ file.fence }}
 {{ file.content }}
 {{ file.fence }}
-{% endfor %}
+{% endif %}
+{% unless forloop.last %}
+
+{% endunless %}
+{%- endfor %}
