@@ -47,14 +47,9 @@ pub struct File {
 #[derive(Debug, Clone, Copy)]
 pub struct EnvironmentPopulateSettings {
     pub allow_globs: bool,
-    pub trim_contents: bool,
 }
 
 impl EnvironmentPopulateSettings {
-    pub fn set_trim_contents(mut self, trim_contents: bool) -> Self {
-        self.trim_contents = trim_contents;
-        self
-    }
     pub fn set_allow_globs(mut self, allow_globs: bool) -> Self {
         self.allow_globs = allow_globs;
         self
@@ -65,7 +60,6 @@ impl std::default::Default for EnvironmentPopulateSettings {
     fn default() -> Self {
         EnvironmentPopulateSettings {
             allow_globs: true,
-            trim_contents: true,
         }
     }
 }
@@ -168,14 +162,15 @@ impl File {
         file_path: impl AsRef<std::path::Path>,
         settings: EnvironmentPopulateSettings,
     ) -> Result<Self, Box<dyn std::error::Error>> {
+        let _ = settings;
         let file_path = file_path.as_ref();
         let file_name = file_path.file_name().unwrap().to_str().unwrap().to_string();
 
-        let mut file_content = std::fs::read_to_string(file_path)?;
+        let file_content = std::fs::read_to_string(file_path)?;
 
-        if settings.trim_contents {
-            file_content = file_content.trim().to_owned();
-        }
+        // if settings.trim_contents {
+        //     file_content = file_content.trim().to_owned();
+        // }
 
         Ok(File {
             name: file_name,
@@ -267,11 +262,12 @@ impl File {
         content: impl Into<String>,
         settings: EnvironmentPopulateSettings,
     ) -> Self {
-        let mut content = content.into();
+        let _ = settings;
+        let content = content.into();
 
-        if settings.trim_contents {
-            content = content.trim().to_owned();
-        }
+        // if settings.trim_contents {
+        //     content = content.trim().to_owned();
+        // }
 
         File {
             name: "<stdin>".to_string(),

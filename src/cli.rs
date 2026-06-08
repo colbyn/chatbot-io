@@ -26,12 +26,6 @@ pub struct CliFormatCommand {
     /// Disable glob mode behavior; all inputs will be considered file paths. OFF by default.
     #[arg(long, default_value_t = false)]
     no_globs: bool,
-    /// By default the system will attempt to trim the content string of leading and trailing whitespace. This flag will disable that behavior.
-    #[arg(long, default_value_t = false)]
-    no_trim: bool,
-    /// Compress
-    #[arg(long, default_value_t = false)]
-    compress: bool,
 }
 
 impl Cli {
@@ -46,8 +40,7 @@ impl CliFormatCommand {
     pub fn execute(self) {
         let default_template_source = include_str!("../default.liquid");
         let settings = crate::template::EnvironmentPopulateSettings::default()
-            .set_allow_globs(!self.no_globs)
-            .set_trim_contents(!self.no_trim);
+            .set_allow_globs(!self.no_globs);
         let environment_result = crate::template::Environment::populate_from(
             &self.input,
             settings
