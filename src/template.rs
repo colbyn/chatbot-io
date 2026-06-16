@@ -168,6 +168,8 @@ impl File {
 
         let file_content = std::fs::read_to_string(file_path)?;
 
+        let file_content = file_content.trim().to_owned();
+
         // if settings.trim_contents {
         //     file_content = file_content.trim().to_owned();
         // }
