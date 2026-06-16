@@ -12,7 +12,7 @@ pub struct Cli {
 
 #[derive(Subcommand, Debug)]
 pub enum CliCommand {
-    #[clap(alias = "f")]
+    #[clap(aliases = &["fmt", "f"])]
     Format(CliFormatCommand),
 }
 
