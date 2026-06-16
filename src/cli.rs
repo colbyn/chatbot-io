@@ -1,6 +1,8 @@
 use std::path::PathBuf;
 use clap::{Parser, Subcommand};
 
+static DEFAULT_TEMPLATE_SOURCE: &'static str = include_str!("../default.liquid");
+
 #[derive(Parser, Debug)]
 #[command(version, about, long_about = None)]
 pub struct Cli {
@@ -38,7 +40,6 @@ impl Cli {
 
 impl CliFormatCommand {
     pub fn execute(self) {
-        let default_template_source = include_str!("../default.liquid");
         let settings = crate::template::EnvironmentPopulateSettings::default()
             .set_allow_globs(!self.no_globs);
         let environment_result = crate::template::Environment::populate_from(
@@ -52,7 +53,7 @@ impl CliFormatCommand {
                 })
             } else {
                 environment_result.and_then(|x| {
-                    x.run_preprocessor_with_template_str(default_template_source)
+                    x.run_preprocessor_with_template_str(DEFAULT_TEMPLATE_SOURCE)
                 })
             }
         };
