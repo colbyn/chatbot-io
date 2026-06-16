@@ -290,3 +290,45 @@ fn compute_fence(content: &str) -> String {
         fence = format!("{fence}`");
     }
 }
+
+#[cfg(test)]
+mod test {
+    #[test]
+    fn preserves_typst_spread_line_inside_file_content() {
+        let content = r#"#box(inset: 0pt)[
+    #grid(
+        columns: (1fr, 1fr),
+        column-gutter: 24pt,
+        row-gutter: 18pt,
+        ..sections.enumerate().map(((i, f)) => {
+        f(cycle-color(i))
+        }),
+    )
+    ]
+    "#;
+
+        let env = crate::template::Environment {
+            files: vec![crate::template::File {
+                name: "cover-points.typ".into(),
+                path: std::path::PathBuf::from("src/cover-points.typ"),
+                fence: super::compute_fence(content),
+                content: content.into(),
+            }],
+        };
+
+        let template = r#"{% for file in files -%}
+    **`{{ file.path }}`**:
+    {{ file.fence }}
+    {{ file.content }}
+    {{ file.fence }}
+    {%- endfor %}
+    "#;
+
+        let rendered = env.run_preprocessor_with_template_str(template).unwrap();
+
+        assert!(
+            rendered.contains("..sections.enumerate().map(((i, f)) => {"),
+            "{rendered}"
+        );
+    }
+}
