@@ -268,6 +268,7 @@ impl File {
         // if settings.trim_contents {
         //     content = content.trim().to_owned();
         // }
+        let content = content.trim().to_owned();
 
         File {
             name: "<stdin>".to_string(),
