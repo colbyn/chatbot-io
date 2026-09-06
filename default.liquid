@@ -3,10 +3,12 @@
 {{ file.fence }}
 {{ file.content }}
 {{ file.fence }}
+
 {% else -%}
 `{{ file.path }}`:
 {{ file.fence }}
 {{ file.content }}
 {{ file.fence }}
 {% endif %}
-{%- endfor %}
+
+{% endfor %}
